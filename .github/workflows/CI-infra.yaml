@@ -1,10 +1,16 @@
 name: CI for Infra
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'infra/**'
   pull_request:
     branches:
       - main
-
+    paths:
+      - 'infra/**'
 jobs:
   terraform:
     runs-on: ubuntu-latest
@@ -26,7 +32,7 @@ jobs:
 
     - name: Terraform Init
       working-directory: infra
-      run: terraform init
+      run: terraform init -backend-config=config/dev.config
 
     - name: Terraform Validate
       working-directory: infra
@@ -34,7 +40,7 @@ jobs:
 
     - name: Terraform Plan
       working-directory: infra
-      run: terraform plan
+      run: terraform plan -out=terraform.tfplan
 
     - name: Upload Terraform Plan
       uses: actions/upload-artifact@v2

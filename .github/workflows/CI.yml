@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'polls/**'
   pull_request:
     branches:
       - main
+    paths:
+      - 'polls/**'
 
 jobs:
   build:
@@ -33,6 +37,8 @@ jobs:
       POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+      DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
     steps:
     - name: Checkout code
@@ -53,3 +59,11 @@ jobs:
       run: |
         python polls/manage.py migrate
         python polls/manage.py test
+
+    - name: Log in to Docker Hub
+      run: echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+
+    - name: Build and push Docker image
+      run: |
+        docker build -t jester91/devops-challenge:latest .
+        docker push jester91/devops-challenge:latest
